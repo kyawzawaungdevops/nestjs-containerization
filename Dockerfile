@@ -14,9 +14,8 @@ WORKDIR /app
 COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
 RUN pnpm build
-RUN pnpm prune --prod
 
-FROM base AS deploy
+FROM base AS dev
 
 WORKDIR /app
 COPY --from=build /app/dist/ ./dist/
