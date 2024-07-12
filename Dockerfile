@@ -1,20 +1,15 @@
-FROM node:18-alpine AS base
-RUN npm i -g pnpm
-
-FROM base AS dependencies
+# Stage 1: Build
+FROM node:18-alpine AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
-
-FROM base AS build
-WORKDIR /app
+RUN npm i -g pnpm && pnpm install 
 COPY . .
-COPY --from=dependencies /app/node_modules ./node_modules
 RUN pnpm build
 
-FROM base AS dev
+# Stage 2: Production
+FROM node:18-alpine AS production
 WORKDIR /app
-COPY --from=build /app/dist/ ./dist/
+COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 
-CMD [ "node", "dist/main.js" ]
+CMD ["node", "dist/main.js"]
