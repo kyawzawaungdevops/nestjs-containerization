@@ -15,7 +15,7 @@ services:
         aliases:
           - mongo_db
 
-  nestjs:
+  verdant-sphere-api:
     build:
       context: .
       dockerfile: Dockerfile
