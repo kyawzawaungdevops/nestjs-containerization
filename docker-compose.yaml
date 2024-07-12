@@ -1,0 +1,40 @@
+services:
+  mongodb:
+    image: mongo:nanoserver-ltsc2022
+    container_name: mongodb
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+    networks:
+      verdant-sphere-api_network:
+        aliases:
+          - mongo_db
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: verdant-sphere-api:v1
+    container_name: verdant-sphere-api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URI: ${DATABASE_URI}
+      PORT: ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - mongodb
+    networks:
+      verdant-sphere-api_network:
+        aliases:
+          - nest_js
+
+networks:
+  verdant-sphere-api_network:
+    driver: bridge
