@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:nanoserver-ltsc2022
+    image: mongo:latest
     container_name: mongodb
     env_file:
       - .env
@@ -19,7 +19,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: verdant-sphere-api:v1
     container_name: verdant-sphere-api
     env_file:
       - .env

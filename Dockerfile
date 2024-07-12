@@ -1,35 +1,25 @@
-# Base image with Node.js and PNPM
-FROM node:20-slim AS base
+FROM node:18-alpine AS base
 
-# Install PNPM globally
-RUN npm install -g pnpm
+RUN npm i -g pnpm
 
-# Set the working directory
+FROM base AS dependencies
+
 WORKDIR /app
-
-# Copy all files to the container
-COPY . .
-
-# Install dependencies using PNPM
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
-# Build the project
-RUN pnpm run build
+FROM base AS build
 
-# base image
-FROM node:20-slim AS developmanet
-
-# Set the working directory
 WORKDIR /app
+COPY . .
+COPY --from=dependencies /app/node_modules ./node_modules
+RUN pnpm build
+RUN pnpm prune --prod
 
-# Copy production dependencies from the base stage
-COPY --from=base /app/node_modules /app/node_modules
+FROM base AS deploy
 
-# Copy the compiled TypeScript code from the base stage
-COPY --from=base /app/dist /app/dist
+WORKDIR /app
+COPY --from=build /app/dist/ ./dist/
+COPY --from=build /app/node_modules ./node_modules
 
-# Expose incoming connections
-EXPOSE 3000
-
-# Start the application
-CMD [ "pnpm", "start","dev" ]
+CMD [ "node", "dist/main.js" ]
